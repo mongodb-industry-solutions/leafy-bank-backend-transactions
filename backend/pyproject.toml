@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "your-virtual-env"
 version = "0.1.0"
-description = "Your Description"
-authors = ["Your Name <you@example.com>"]
+description = "This repository powers the backend for Leafy Bank, handling digital payments and account transfers."
+authors = ["Julian Boronat <julian.boronat@mongodb.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
