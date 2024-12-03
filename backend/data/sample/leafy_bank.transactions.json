@@ -1,0 +1,468 @@
+[{
+  "_id": {
+    "$oid": "674f216ae5f0f1d4ee2c17ec"
+  },
+  "TransactionAmount": 100,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "AccountTransfer",
+    "TransactionInternal": true
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d0"
+      },
+      "AccountNumber": "1234567890",
+      "AccountType": "Checking"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:04.742Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:06.690Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:07.210Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f216be5f0f1d4ee2c17ef"
+  },
+  "TransactionAmount": 50,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Paypal"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "671ff2451ec726b417352703"
+      },
+      "UserName": "claumon",
+      "AccountId": {
+        "$oid": "674ee14f3dc463acd6eb5633"
+      },
+      "AccountNumber": "321321321",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:07.446Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:07.849Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:19:08.369Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2ab5c934e4287db69049"
+  },
+  "TransactionAmount": 200,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "AccountTransfer",
+    "TransactionInternal": true
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d0"
+      },
+      "AccountNumber": "1234567890",
+      "AccountType": "Checking"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:43.639Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:45.380Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:45.908Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2ab6c934e4287db6904c"
+  },
+  "TransactionAmount": 150,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Zelle"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "671ff2451ec726b417352703"
+      },
+      "UserName": "claumon",
+      "AccountId": {
+        "$oid": "674ee14f3dc463acd6eb5633"
+      },
+      "AccountNumber": "321321321",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:46.193Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:46.545Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T15:58:47.067Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2ee0e6dddef0e8cc8f19"
+  },
+  "TransactionAmount": 100,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "AccountTransfer",
+    "TransactionInternal": true
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d0"
+      },
+      "AccountNumber": "1234567890",
+      "AccountType": "Checking"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:31.354Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:33.103Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:33.625Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2ee2e6dddef0e8cc8f1c"
+  },
+  "TransactionAmount": 100,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Zelle"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "671ff2451ec726b417352703"
+      },
+      "UserName": "claumon",
+      "AccountId": {
+        "$oid": "674ee14f3dc463acd6eb5633"
+      },
+      "AccountNumber": "321321321",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:33.922Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:34.325Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:16:34.849Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2fb31e72564fe02b6708"
+  },
+  "TransactionAmount": 50,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "AccountTransfer",
+    "TransactionInternal": true
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d0"
+      },
+      "AccountNumber": "1234567890",
+      "AccountType": "Checking"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:02.124Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:03.889Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:04.412Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "674f2fb41e72564fe02b670b"
+  },
+  "TransactionAmount": 50,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Zelle"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "671ff2451ec726b417352703"
+      },
+      "UserName": "claumon",
+      "AccountId": {
+        "$oid": "674ee14f3dc463acd6eb5633"
+      },
+      "AccountNumber": "321321321",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:04.706Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:05.107Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-03T16:20:05.788Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+}]
