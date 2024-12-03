@@ -1,0 +1,192 @@
+[{
+  "_id": {
+    "$oid": "674f216be5f0f1d4ee2c17ed"
+  },
+  "NotificationEvent": "TransferSent",
+  "NotificationMessage": "You have sent EUR 100.0 to fridaklo with status completed. EUR Balance: 2400.0",
+  "UserName": "fridaklo"
+},
+{
+  "_id": {
+    "$oid": "674f216be5f0f1d4ee2c17ee"
+  },
+  "NotificationEvent": "TransferReceived",
+  "NotificationMessage": "You have received EUR 100.0 as incoming from fridaklo with status completed. EUR Balance: 5100.0",
+  "UserName": "fridaklo"
+},
+{
+  "_id": {
+    "$oid": "674f216ce5f0f1d4ee2c17f0"
+  },
+  "NotificationEvent": "PaymentMade",
+  "NotificationMessage": "You have sent EUR 50.0 to gracehop with status completed. EUR Balance: 2700.0",
+  "UserName": "claumon"
+},
+{
+  "_id": {
+    "$oid": "674f216ce5f0f1d4ee2c17f1"
+  },
+  "NotificationEvent": "PaymentReceived",
+  "NotificationMessage": "You have received EUR 50.0 as incoming from claumon with status completed. EUR Balance: 4550.0",
+  "UserName": "gracehop"
+},
+{
+  "_id": {
+    "$oid": "674f2ab5c934e4287db6904a"
+  },
+  "NotificationEvent": "TransferSent",
+  "NotificationMessage": "You have transferred EUR 200.0 to fridaklo. Your new balance is EUR 2200.0.",
+  "UserName": "fridaklo"
+},
+{
+  "_id": {
+    "$oid": "674f2ab5c934e4287db6904b"
+  },
+  "NotificationEvent": "TransferReceived",
+  "NotificationMessage": "You have received a transfer of EUR 200.0 from fridaklo. Your new balance is EUR 5300.0.",
+  "UserName": "fridaklo"
+},
+{
+  "_id": {
+    "$oid": "674f2ab6c934e4287db6904d"
+  },
+  "NotificationEvent": "PaymentMade",
+  "NotificationMessage": "You have made a payment of EUR 150.0 to gracehop using Zelle. Your new balance is EUR 2550.0.",
+  "UserName": "claumon"
+},
+{
+  "_id": {
+    "$oid": "674f2ab6c934e4287db6904e"
+  },
+  "NotificationEvent": "PaymentReceived",
+  "NotificationMessage": "You have received a payment of EUR 150.0 from claumon via Zelle. Your new balance is EUR 4700.0.",
+  "UserName": "gracehop"
+},
+{
+  "_id": {
+    "$oid": "674f2ee1e6dddef0e8cc8f1a"
+  },
+  "NotificationEvent": "TransferSent",
+  "NotificationMessage": "You have transferred EUR 100.0 to fridaklo. Your new balance is EUR 2100.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:16:33.509Z"
+  },
+  "User": {
+    "UserName": "fridaklo",
+    "UserId": {
+      "$oid": "65a546ae4a8f64e8f88fb89e"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2ee1e6dddef0e8cc8f1b"
+  },
+  "NotificationEvent": "TransferReceived",
+  "NotificationMessage": "You have received a transfer of EUR 100.0 from fridaklo. Your new balance is EUR 5400.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:16:33.509Z"
+  },
+  "User": {
+    "UserName": "fridaklo",
+    "UserId": {
+      "$oid": "65a546ae4a8f64e8f88fb89e"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2ee2e6dddef0e8cc8f1d"
+  },
+  "NotificationEvent": "PaymentMade",
+  "NotificationMessage": "You have made a payment of EUR 100.0 to gracehop using Zelle. Your new balance is EUR 2450.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:16:34.683Z"
+  },
+  "User": {
+    "UserName": "claumon",
+    "UserId": {
+      "$oid": "671ff2451ec726b417352703"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2ee2e6dddef0e8cc8f1e"
+  },
+  "NotificationEvent": "PaymentReceived",
+  "NotificationMessage": "You have received a payment of EUR 100.0 from claumon via Zelle. Your new balance is EUR 4800.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:16:34.683Z"
+  },
+  "User": {
+    "UserName": "gracehop",
+    "UserId": {
+      "$oid": "66fe219d625d93a100528224"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2fb41e72564fe02b6709"
+  },
+  "NotificationEvent": "TransferSent",
+  "NotificationMessage": "You have transferred EUR 50.0 to fridaklo. Your new balance is EUR 2050.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:20:04.293Z"
+  },
+  "NotificationUser": {
+    "UserName": "fridaklo",
+    "UserId": {
+      "$oid": "65a546ae4a8f64e8f88fb89e"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2fb41e72564fe02b670a"
+  },
+  "NotificationEvent": "TransferReceived",
+  "NotificationMessage": "You have received a transfer of EUR 50.0 from fridaklo. Your new balance is EUR 5450.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:20:04.293Z"
+  },
+  "NotificationUser": {
+    "UserName": "fridaklo",
+    "UserId": {
+      "$oid": "65a546ae4a8f64e8f88fb89e"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2fb51e72564fe02b670c"
+  },
+  "NotificationEvent": "PaymentMade",
+  "NotificationMessage": "You have made a payment of EUR 50.0 to gracehop using Zelle. Your new balance is EUR 2400.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:20:05.669Z"
+  },
+  "NotificationUser": {
+    "UserName": "claumon",
+    "UserId": {
+      "$oid": "671ff2451ec726b417352703"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "674f2fb51e72564fe02b670d"
+  },
+  "NotificationEvent": "PaymentReceived",
+  "NotificationMessage": "You have received a payment of EUR 50.0 from claumon via Zelle. Your new balance is EUR 4850.0.",
+  "NotificationDate": {
+    "$date": "2024-12-03T16:20:05.669Z"
+  },
+  "NotificationUser": {
+    "UserName": "gracehop",
+    "UserId": {
+      "$oid": "66fe219d625d93a100528224"
+    }
+  }
+}]
