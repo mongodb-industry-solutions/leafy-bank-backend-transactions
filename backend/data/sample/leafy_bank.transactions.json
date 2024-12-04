@@ -465,4 +465,180 @@
   "TransactionStatus": "Notified",
   "TransactionCompleted": true,
   "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "6750675a91afa402d4d9189a"
+  },
+  "TransactionAmount": 150,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "AccountTransfer",
+    "TransactionInternal": false
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:29:46.512Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:29:46.934Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:29:47.674Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "67506a0a3a878252eda40b57"
+  },
+  "TransactionAmount": 100,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Venmo"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:41:14.169Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:41:14.596Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:41:15.165Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
+},
+{
+  "_id": {
+    "$oid": "67506a603a878252eda40b5a"
+  },
+  "TransactionAmount": 50,
+  "TransactionDescription": "N/A",
+  "TransactionDetails": {
+    "TransactionType": "DigitalPayment",
+    "TransactionInternal": false,
+    "TransactionPaymentMethod": "Paypal"
+  },
+  "TransactionReferenceData": {
+    "TransactionSender": {
+      "UserId": {
+        "$oid": "66fe219d625d93a100528224"
+      },
+      "UserName": "gracehop",
+      "AccountId": {
+        "$oid": "674eee8aeba89055c8ef3617"
+      },
+      "AccountNumber": "765438213",
+      "AccountType": "Savings"
+    },
+    "TransactionReceiver": {
+      "UserId": {
+        "$oid": "65a546ae4a8f64e8f88fb89e"
+      },
+      "UserName": "fridaklo",
+      "AccountId": {
+        "$oid": "674dc33d4473ad1e1d4e02d1"
+      },
+      "AccountNumber": "9876543210",
+      "AccountType": "Savings"
+    }
+  },
+  "TransactionDates": [
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:42:39.932Z"
+      },
+      "TransactionDateType": "TransactionInitiatedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:42:40.451Z"
+      },
+      "TransactionDateType": "TransactionCompletedDate"
+    },
+    {
+      "TransactionDate": {
+        "$date": "2024-12-04T14:42:41.084Z"
+      },
+      "TransactionDateType": "TransactionNotifiedDate"
+    }
+  ],
+  "TransactionStatus": "Notified",
+  "TransactionCompleted": true,
+  "TransactionNotified": true
 }]

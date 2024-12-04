@@ -7,7 +7,9 @@ from database.connection import MongoDBConnection
 from typing import Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class TransactionsService:
     """This class provides methods to perform transactions in the database."""
@@ -32,7 +34,7 @@ class TransactionsService:
                             transaction_amount: float, sender_user_id: str, sender_user_name: str,
                             sender_account_number: str, sender_account_type: str, receiver_user_id: str,
                             receiver_user_name: str, receiver_account_number: str, receiver_account_type: str,
-                            transaction_type: str, transaction_description: Optional[str] = "N/A", payment_method: Optional[str] = "N/A") -> bool:
+                            transaction_type: str, transaction_description: Optional[str] = "N/A", payment_method: Optional[str] = "N/A") -> ObjectId:
         """Perform a transaction between two accounts.
 
         Args:
@@ -52,8 +54,77 @@ class TransactionsService:
             payment_method (str, Optional): The payment method used if the transaction is a DigitalPayment.
 
         Returns:
-            bool: True if the transaction was successful, False otherwise.
+            ObjectId: The ID of the transaction document if the transaction is successful, None otherwise
         """
+
+        # In Python, type hints (like float in function signature) are not enforced at runtime.
+        # This means that even if you specify transaction_amount: float, the actual value passed to the function can still be an integer if it's not explicitly converted to a float.
+        # Ensure transaction_amount is a float
+        # Validate that transaction_amount is a float
+        try:
+            transaction_amount = float(transaction_amount)
+        except ValueError:
+            logging.error("Transaction amount must be a float.")
+            return None
+        
+        # Check if the transaction amount is valid
+        if transaction_amount <= 0:
+            logging.error("Transaction amount must be greater than 0.")
+            return None
+
+        transaction_limit = float(500)
+
+        # Check if the transaction amount exceeds the limit
+        if transaction_amount > transaction_limit:
+            logging.error(
+                f"Transaction amount exceeds the limit of {transaction_limit}.")
+            return None
+
+        # Retrieve and validate sender account details
+        sender_account = self.accounts_collection.find_one(
+            {"_id": ObjectId(account_id_sender)})
+        if not sender_account:
+            logging.error("Sender account not found.")
+            return None
+        if sender_account["AccountBalance"] < transaction_amount:
+            logging.error("Insufficient funds in sender account.")
+            return None
+        if sender_account["AccountStatus"] == "Closed":
+            logging.error("Sender account is closed.")
+            return None
+        if (sender_account["AccountNumber"] != sender_account_number or
+                sender_account["AccountType"] != sender_account_type):
+            logging.error("Sender account details do not match.")
+            return None
+
+        # Retrieve and validate sender user details
+        sender_user = self.users_collection.find_one(
+            {"_id": ObjectId(sender_user_id)})
+        if not sender_user or sender_user["UserName"] != sender_user_name:
+            logging.error("Sender user details do not match.")
+            return None
+
+        # Retrieve and validate receiver account details
+        receiver_account = self.accounts_collection.find_one(
+            {"_id": ObjectId(account_id_receiver)})
+        if not receiver_account:
+            logging.error("Receiver account not found.")
+            return None
+        if receiver_account["AccountStatus"] == "Closed":
+            logging.error("Receiver account is closed.")
+            return None
+        if (receiver_account["AccountNumber"] != receiver_account_number or
+                receiver_account["AccountType"] != receiver_account_type):
+            logging.error("Receiver account details do not match.")
+            return None
+
+        # Retrieve and validate receiver user details
+        receiver_user = self.users_collection.find_one(
+            {"_id": ObjectId(receiver_user_id)})
+        if not receiver_user or receiver_user["UserName"] != receiver_user_name:
+            logging.error("Receiver user details do not match.")
+            return None
+
         def callback(session: ClientSession):
             # Create the transaction document
 
@@ -124,7 +195,8 @@ class TransactionsService:
             )
 
             # Add new transaction to 'transactions' collection
-            transaction_id = self.transactions_collection.insert_one(transaction, session=session).inserted_id
+            transaction_id = self.transactions_collection.insert_one(
+                transaction, session=session).inserted_id
 
             # Update the transaction document with the completed date and status
             self.transactions_collection.update_one(
@@ -211,7 +283,8 @@ class TransactionsService:
                         "UserId": ObjectId(receiver_user_id)
                     }
                 }
-            self.notifications_collection.insert_many([sender_notification, receiver_notification], session=session)
+            self.notifications_collection.insert_many(
+                [sender_notification, receiver_notification], session=session)
 
             # Update the transaction document with the notified date, status, and notification flag
             self.transactions_collection.update_one(
@@ -231,13 +304,17 @@ class TransactionsService:
                 session=session
             )
 
-            logging.info("Transaction successful")
+            logging.info("Transaction completed!")
+            return transaction_id
 
         # Start a client session and execute the transaction
         with self.db.client.start_session() as session:
             try:
-                session.with_transaction(callback)
-                return True
+                # Execute the transaction with ACID guarantees
+                # MongoDB's transactions ensure atomicity, consistency, isolation, and durability.
+                # For more information, see: https://www.mongodb.com/products/capabilities/transactions
+                transaction_id = session.with_transaction(callback)
+                return transaction_id
             except Exception as e:
                 logging.error(f"Transaction failed: {e}")
-                return False
+                return None
