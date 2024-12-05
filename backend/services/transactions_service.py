@@ -1,4 +1,5 @@
 from bson import ObjectId
+from typing import Union
 from pymongo.client_session import ClientSession
 from datetime import datetime, timezone
 import logging
@@ -29,6 +30,51 @@ class TransactionsService:
         self.transactions_collection = self.db['transactions']
         self.users_collection = self.db['users']
         self.notifications_collection = self.db['notifications']
+
+    def is_valid_user(self, user_identifier: Union[str, ObjectId]) -> bool:
+        """Check if the user exists in the system.
+        Args:
+            user_identifier (Union[str, ObjectId]): The user identifier (username or ObjectId of the user).
+        Returns:
+            bool: True if the user exists, False otherwise.
+        """
+        if isinstance(user_identifier, ObjectId):
+            user_query = {"_id": user_identifier}
+        else:
+            user_query = {"UserName": user_identifier}
+        user = self.users_collection.find_one(user_query, {"_id": 1})
+        return user is not None
+
+    def get_recent_transactions_for_user(self, user_identifier: Union[str, ObjectId]) -> list[dict]:
+        """Get the recent transactions for a specific user by UserName or ID.
+        Args:
+            user_identifier (Union[str, ObjectId]): The UserName or ID of the user.
+        Returns:
+            list[dict]: A list of recent transactions for the user.
+        """
+        # Determining if the identifier is an ObjectId or a username
+        if isinstance(user_identifier, ObjectId):
+            user_query = {"_id": user_identifier}
+        else:
+            user_query = {"UserName": user_identifier}
+        # Fetching the user document
+        user = self.users_collection.find_one(
+            user_query, {"RecentTransactions": 1})
+        if not user or "RecentTransactions" not in user:
+            logging.info(
+                f"No recent transactions found for user {user_identifier}")
+            return []
+        # Extracting the recent transaction IDs, sorted by date descending and limited to 20
+        recent_transactions = sorted(
+            user["RecentTransactions"], key=lambda x: x["Date"], reverse=True)[:20]
+        transaction_ids = [txn["TransactionId"] for txn in recent_transactions]
+        # Fetching the transaction details from the transactions collection
+        transactions = list(self.transactions_collection.find(
+            {"_id": {"$in": transaction_ids}}))
+        # Sorting the transactions by the most recent date in the TransactionDates array
+        transactions.sort(key=lambda x: max(
+            date["TransactionDate"] for date in x["TransactionDates"]), reverse=True)
+        return transactions
 
     def perform_transaction(self, account_id_receiver: str, account_id_sender: str,
                             transaction_amount: float, sender_user_id: str, sender_user_name: str,
@@ -66,7 +112,7 @@ class TransactionsService:
         except ValueError:
             logging.error("Transaction amount must be a float.")
             return None
-        
+
         # Check if the transaction amount is valid
         if transaction_amount <= 0:
             logging.error("Transaction amount must be greater than 0.")

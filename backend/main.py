@@ -1,9 +1,16 @@
 from database.connection import MongoDBConnection
 from services.transactions_service import TransactionsService
+from encoder.json_encoder import MyJSONEncoder
 
 import logging
-from fastapi import FastAPI, HTTPException, Request
+
+import json
+from typing import Union
+from bson import ObjectId
+
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+
 import os
 from dotenv import load_dotenv
 
@@ -60,6 +67,38 @@ def validate_transaction_amount(data):
 @app.get("/")
 async def read_root(request: Request):
     return {"message": "Server is running"}
+
+
+@app.post("/fetch-recent-transactions-for-user")
+async def fetch_recent_transactions_for_user(request: Request):
+    """Retrieve recent transactions for a specific user by UserName or ID.
+    Args:
+        request (Request): The request object containing the user_identifier.
+    Returns:
+        dict: A list of recent transactions associated with the user.
+    """
+    try:
+        data = await request.json()
+        user_identifier = data.get("user_identifier")
+        if not user_identifier:
+            raise HTTPException(
+                status_code=400, detail="User identifier is required")
+        if ObjectId.is_valid(user_identifier):
+            user_identifier = ObjectId(user_identifier)
+        # Validate if the user exists
+        if not transactions_service.is_valid_user(user_identifier):
+            raise HTTPException(
+                status_code=404, detail="User not found")
+        transactions = transactions_service.get_recent_transactions_for_user(user_identifier)
+        if transactions:
+            logging.info(f"Found {len(transactions)} recent transactions for user {user_identifier}")
+            return Response(content=json.dumps({"transactions": transactions}, cls=MyJSONEncoder), media_type="application/json")
+        else:
+            logging.info(f"No recent transactions found for user {user_identifier}")
+            return Response(content=json.dumps({"transactions": []}, cls=MyJSONEncoder), media_type="application/json")
+    except Exception as e:
+        logging.error(f"Error retrieving recent transactions for user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/perform-account-transfer")
