@@ -262,75 +262,106 @@ class TransactionsService:
                 session=session
             )
 
-            # Update RecentTransactions for sender
-            self.users_collection.update_one(
-                {"_id": ObjectId(sender_user_id)},
-                {
-                    "$push": {
-                        "RecentTransactions": {
-                            "$each": [{"TransactionId": transaction_id, "Date": datetime.now(timezone.utc)}],
-                            "$slice": -20
+            # Update RecentTransactions
+            if transaction_internal:
+                # Internal transaction, update only once
+                self.users_collection.update_one(
+                    {"_id": ObjectId(sender_user_id)},
+                    {
+                        "$push": {
+                            "RecentTransactions": {
+                                "$each": [{"TransactionId": transaction_id, "Date": datetime.now(timezone.utc)}],
+                                "$slice": -20
+                            }
                         }
-                    }
-                },
-                session=session
-            )
-            # Update RecentTransactions for receiver
-            self.users_collection.update_one(
-                {"_id": ObjectId(receiver_user_id)},
-                {
-                    "$push": {
-                        "RecentTransactions": {
-                            "$each": [{"TransactionId": transaction_id, "Date": datetime.now(timezone.utc)}],
-                            "$slice": -20
+                    },
+                    session=session
+                )
+            else:
+                # Update RecentTransactions for sender
+                self.users_collection.update_one(
+                    {"_id": ObjectId(sender_user_id)},
+                    {
+                        "$push": {
+                            "RecentTransactions": {
+                                "$each": [{"TransactionId": transaction_id, "Date": datetime.now(timezone.utc)}],
+                                "$slice": -20
+                            }
                         }
-                    }
-                },
-                session=session
-            )
+                    },
+                    session=session
+                )
+                # Update RecentTransactions for receiver
+                self.users_collection.update_one(
+                    {"_id": ObjectId(receiver_user_id)},
+                    {
+                        "$push": {
+                            "RecentTransactions": {
+                                "$each": [{"TransactionId": transaction_id, "Date": datetime.now(timezone.utc)}],
+                                "$slice": -20
+                            }
+                        }
+                    },
+                    session=session
+                )
 
             # Create notifications
             notification_date = datetime.now(timezone.utc)
-            if transaction_type == "AccountTransfer":
-                sender_notification = {
-                    "NotificationEvent": "TransferSent",
-                    "NotificationMessage": f"You have transferred {sender_result['AccountCurrency']} {transaction_amount} to {receiver_user_name}. Your new balance is {sender_result['AccountCurrency']} {sender_result['AccountBalance']}.",
+
+            if sender_user_id == receiver_user_id:
+                # Internal transaction, create a single notification
+                notification = {
+                    "NotificationEvent": "InternalTransfer",
+                    "NotificationMessage": f"You have transferred {sender_result['AccountCurrency']} {transaction_amount} internally!",
                     "NotificationDate": notification_date,
                     "NotificationUser": {
                         "UserName": sender_user_name,
                         "UserId": ObjectId(sender_user_id)
                     }
                 }
-                receiver_notification = {
-                    "NotificationEvent": "TransferReceived",
-                    "NotificationMessage": f"You have received a transfer of {receiver_result['AccountCurrency']} {transaction_amount} from {sender_user_name}. Your new balance is {receiver_result['AccountCurrency']} {receiver_result['AccountBalance']}.",
-                    "NotificationDate": notification_date,
-                    "NotificationUser": {
-                        "UserName": receiver_user_name,
-                        "UserId": ObjectId(receiver_user_id)
+                self.notifications_collection.insert_one(notification, session=session)
+            else:
+                # Create separate notifications for sender and receiver
+                if transaction_type == "AccountTransfer":
+                    sender_notification = {
+                        "NotificationEvent": "TransferSent",
+                        "NotificationMessage": f"You have transferred {sender_result['AccountCurrency']} {transaction_amount} to {receiver_user_name}. Your new balance is {sender_result['AccountCurrency']} {sender_result['AccountBalance']}.",
+                        "NotificationDate": notification_date,
+                        "NotificationUser": {
+                            "UserName": sender_user_name,
+                            "UserId": ObjectId(sender_user_id)
+                        }
                     }
-                }
-            else:  # Assuming the other type is DigitalPayment
-                sender_notification = {
-                    "NotificationEvent": "PaymentMade",
-                    "NotificationMessage": f"You have made a payment of {sender_result['AccountCurrency']} {transaction_amount} to {receiver_user_name} using {payment_method}. Your new balance is {sender_result['AccountCurrency']} {sender_result['AccountBalance']}.",
-                    "NotificationDate": notification_date,
-                    "NotificationUser": {
-                        "UserName": sender_user_name,
-                        "UserId": ObjectId(sender_user_id)
+                    receiver_notification = {
+                        "NotificationEvent": "TransferReceived",
+                        "NotificationMessage": f"You have received a transfer of {receiver_result['AccountCurrency']} {transaction_amount} from {sender_user_name}. Your new balance is {receiver_result['AccountCurrency']} {receiver_result['AccountBalance']}.",
+                        "NotificationDate": notification_date,
+                        "NotificationUser": {
+                            "UserName": receiver_user_name,
+                            "UserId": ObjectId(receiver_user_id)
+                        }
                     }
-                }
-                receiver_notification = {
-                    "NotificationEvent": "PaymentReceived",
-                    "NotificationMessage": f"You have received a payment of {receiver_result['AccountCurrency']} {transaction_amount} from {sender_user_name} via {payment_method}. Your new balance is {receiver_result['AccountCurrency']} {receiver_result['AccountBalance']}.",
-                    "NotificationDate": notification_date,
-                    "NotificationUser": {
-                        "UserName": receiver_user_name,
-                        "UserId": ObjectId(receiver_user_id)
+                else:  # Assuming the other type is DigitalPayment
+                    sender_notification = {
+                        "NotificationEvent": "PaymentMade",
+                        "NotificationMessage": f"You have made a payment of {sender_result['AccountCurrency']} {transaction_amount} to {receiver_user_name} using {payment_method}. Your new balance is {sender_result['AccountCurrency']} {sender_result['AccountBalance']}.",
+                        "NotificationDate": notification_date,
+                        "NotificationUser": {
+                            "UserName": sender_user_name,
+                            "UserId": ObjectId(sender_user_id)
+                        }
                     }
-                }
-            self.notifications_collection.insert_many(
-                [sender_notification, receiver_notification], session=session)
+                    receiver_notification = {
+                        "NotificationEvent": "PaymentReceived",
+                        "NotificationMessage": f"You have received a payment of {receiver_result['AccountCurrency']} {transaction_amount} from {sender_user_name} via {payment_method}. Your new balance is {receiver_result['AccountCurrency']} {receiver_result['AccountBalance']}.",
+                        "NotificationDate": notification_date,
+                        "NotificationUser": {
+                            "UserName": receiver_user_name,
+                            "UserId": ObjectId(receiver_user_id)
+                        }
+                    }
+                self.notifications_collection.insert_many([sender_notification, receiver_notification], session=session)
+
 
             # Update the transaction document with the notified date, status, and notification flag
             self.transactions_collection.update_one(
