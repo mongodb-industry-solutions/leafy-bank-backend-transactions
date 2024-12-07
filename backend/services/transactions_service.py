@@ -307,8 +307,16 @@ class TransactionsService:
 
             # Create notifications
             notification_date = datetime.now(timezone.utc)
-
-            if sender_user_id == receiver_user_id:
+            
+            notification_accounts = {
+                "AccountIdSender": ObjectId(account_id_sender),
+                "AccountNumberSender": sender_account_number,
+                "AccountTypeSender": sender_account_type,
+                "AccountIdReceiver": ObjectId(account_id_receiver),
+                "AccountNumberReceiver": receiver_account_number,
+                "AccountTypeReceiver": receiver_account_type
+            }
+            if transaction_internal:
                 # Internal transaction, create a single notification
                 notification = {
                     "NotificationEvent": "InternalTransfer",
@@ -317,7 +325,11 @@ class TransactionsService:
                     "NotificationUser": {
                         "UserName": sender_user_name,
                         "UserId": ObjectId(sender_user_id)
-                    }
+                    },
+                    "NotificationTransaction": {
+                        "TransactionId": transaction_id
+                    },
+                    "NotificationAccounts": notification_accounts
                 }
                 self.notifications_collection.insert_one(notification, session=session)
             else:
@@ -330,7 +342,11 @@ class TransactionsService:
                         "NotificationUser": {
                             "UserName": sender_user_name,
                             "UserId": ObjectId(sender_user_id)
-                        }
+                        },
+                        "NotificationTransaction": {
+                            "TransactionId": transaction_id
+                        },
+                        "NotificationAccounts": notification_accounts
                     }
                     receiver_notification = {
                         "NotificationEvent": "TransferReceived",
@@ -339,7 +355,11 @@ class TransactionsService:
                         "NotificationUser": {
                             "UserName": receiver_user_name,
                             "UserId": ObjectId(receiver_user_id)
-                        }
+                        },
+                        "NotificationTransaction": {
+                            "TransactionId": transaction_id
+                        },
+                        "NotificationAccounts": notification_accounts
                     }
                 else:  # Assuming the other type is DigitalPayment
                     sender_notification = {
@@ -349,7 +369,11 @@ class TransactionsService:
                         "NotificationUser": {
                             "UserName": sender_user_name,
                             "UserId": ObjectId(sender_user_id)
-                        }
+                        },
+                        "NotificationTransaction": {
+                            "TransactionId": transaction_id
+                        },
+                        "NotificationAccounts": notification_accounts
                     }
                     receiver_notification = {
                         "NotificationEvent": "PaymentReceived",
@@ -358,10 +382,13 @@ class TransactionsService:
                         "NotificationUser": {
                             "UserName": receiver_user_name,
                             "UserId": ObjectId(receiver_user_id)
-                        }
+                        },
+                        "NotificationTransaction": {
+                            "TransactionId": transaction_id
+                        },
+                        "NotificationAccounts": notification_accounts
                     }
                 self.notifications_collection.insert_many([sender_notification, receiver_notification], session=session)
-
 
             # Update the transaction document with the notified date, status, and notification flag
             self.transactions_collection.update_one(
