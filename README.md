@@ -132,3 +132,9 @@ E.g. `http://localhost:8001/docs`
 ## Common errors
 
 - Check that you've created an `.env` file that contains the `MONGODB_URI` and `ORIGINS` variables.
+
+## Future tasks
+
+- [ ] Add tests
+- [ ] Evaluate sonarqube for code quality
+- [ ] Automate the deployment process
