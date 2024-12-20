@@ -5,7 +5,7 @@ from encoder.json_encoder import MyJSONEncoder
 import logging
 
 import json
-from typing import Union
+from pydantic import BaseModel
 from bson import ObjectId
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -69,13 +69,25 @@ async def read_root(request: Request):
     return {"message": "Server is running"}
 
 
-@app.post("/fetch-recent-transactions-for-user")
-async def fetch_recent_transactions_for_user(request: Request):
-    """Retrieve recent transactions for a specific user by UserName or ID.
+class UserIdentifierRequest(BaseModel):
+    user_identifier: str
+
+
+class RecentTransactionsResponse(BaseModel):
+    transactions: dict
+
+
+@app.post("/fetch-recent-transactions-for-user", response_model=RecentTransactionsResponse)
+async def fetch_recent_transactions_for_user(request: Request, user_data: UserIdentifierRequest):
+    """
+    Retrieve recent transactions for a specific user by UserName or ID.
+
     Args:
         request (Request): The request object containing the user_identifier.
+        user_data (UserIdentifierRequest): The user identifier data.
+
     Returns:
-        dict: A list of recent transactions associated with the user.
+        RecentTransactionsResponse: A dictionary containing a list of recent transactions associated with the user.
     """
     try:
         data = await request.json()
@@ -89,27 +101,52 @@ async def fetch_recent_transactions_for_user(request: Request):
         if not transactions_service.is_valid_user(user_identifier):
             raise HTTPException(
                 status_code=404, detail="User not found")
-        transactions = transactions_service.get_recent_transactions_for_user(user_identifier)
+        transactions = transactions_service.get_recent_transactions_for_user(
+            user_identifier)
         if transactions:
-            logging.info(f"Found {len(transactions)} recent transactions for user {user_identifier}")
+            logging.info(
+                f"Found {len(transactions)} recent transactions for user {user_identifier}")
             return Response(content=json.dumps({"transactions": transactions}, cls=MyJSONEncoder), media_type="application/json")
         else:
-            logging.info(f"No recent transactions found for user {user_identifier}")
+            logging.info(
+                f"No recent transactions found for user {user_identifier}")
             return Response(content=json.dumps({"transactions": []}, cls=MyJSONEncoder), media_type="application/json")
     except Exception as e:
-        logging.error(f"Error retrieving recent transactions for user: {str(e)}")
+        logging.error(
+            f"Error retrieving recent transactions for user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/perform-account-transfer")
-async def perform_account_transfer(request: Request):
-    """Perform an account transfer transaction.
+class AccountTransferRequest(BaseModel):
+    account_id_sender: str
+    account_id_receiver: str
+    transaction_amount: float
+    sender_user_id: str
+    sender_user_name: str
+    sender_account_number: str
+    sender_account_type: str
+    receiver_user_id: str
+    receiver_user_name: str
+    receiver_account_number: str
+    receiver_account_type: str
+
+
+class AccountTransferResponse(BaseModel):
+    message: str
+    transaction_id: str
+
+
+@app.post("/perform-account-transfer", response_model=AccountTransferResponse)
+async def perform_account_transfer(request: Request, transfer_data: AccountTransferRequest):
+    """
+    Perform an account transfer transaction.
 
     Args:
         request (Request): The request object containing transaction data.
+        transfer_data (AccountTransferRequest): The transfer data.
 
     Returns:
-        dict: A message indicating success or failure.
+        AccountTransferResponse: A dictionary indicating success with the transaction ID.
     """
     try:
         data = await request.json()
@@ -144,15 +181,37 @@ async def perform_account_transfer(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/perform-digital-payment")
-async def perform_digital_payment(request: Request):
-    """Perform a digital payment transaction.
+class DigitalPaymentRequest(BaseModel):
+    account_id_sender: str
+    account_id_receiver: str
+    transaction_amount: float
+    sender_user_id: str
+    sender_user_name: str
+    sender_account_number: str
+    sender_account_type: str
+    receiver_user_id: str
+    receiver_user_name: str
+    receiver_account_number: str
+    receiver_account_type: str
+    payment_method: str
+
+
+class DigitalPaymentResponse(BaseModel):
+    message: str
+    transaction_id: str
+
+
+@app.post("/perform-digital-payment", response_model=DigitalPaymentResponse)
+async def perform_digital_payment(request: Request, payment_data: DigitalPaymentRequest):
+    """
+    Perform a digital payment transaction.
 
     Args:
-        request (Request): The request object containing transaction data.
+        request (Request): The request object containing payment data.
+        payment_data (DigitalPaymentRequest): The payment data.
 
     Returns:
-        dict: A message indicating success or failure.
+        DigitalPaymentResponse: A dictionary indicating success with the transaction ID.
     """
     try:
         data = await request.json()
