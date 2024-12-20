@@ -129,6 +129,8 @@ http://localhost:<PORT_NUMBER>/docs
 ```
 E.g. `http://localhost:8001/docs`
 
+> **_Note:_** Make sure to replace `<PORT_NUMBER>` with the port number you are using and ensure the backend is running.
+
 ## Common errors
 
 - Check that you've created an `.env` file that contains the `MONGODB_URI` and `ORIGINS` variables.
