@@ -24,7 +24,7 @@ These attributes highlight MongoDB's strength as a powerful choice for developin
 
 ## High Level Architecture
 
-![High Level Architecture](architecture/transactionsService_diagram.png)
+![High Level Architecture](architecture/transactions_diagram.png)
 
 ## Tech Stack
 
