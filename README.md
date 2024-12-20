@@ -6,7 +6,7 @@ This repository powers the backend for Leafy Bank, handling digital payments and
 
 MongoDB excels in managing complex operational data, making it an ideal choice for financial services that require robust transaction processing.
 
-## The 4 Pillars of the Document Model
+### The 4 Pillars of the Document Model
 
 1. **Easy**: [MongoDB's document model](https://www.mongodb.com/resources/basics/databases/document-databases) aligns naturally with object-oriented programming, using BSON documents similar to JSON. This design simplifies managing complex data structures such as users, accounts, transactions and notifications, facilitating feature implementation with greater ease.
 
@@ -16,7 +16,7 @@ MongoDB excels in managing complex operational data, making it an ideal choice f
 
 4. **Versatile**: The document model in MongoDB seamlessly handles diverse data types, including strings, numbers, booleans, arrays, objects, and even vectors! This versatility supports a wide range of operational use cases, enabling comprehensive management of users, accounts, transactions, and notifications seamlessly within your application.
 
-## Multi-Document Transaction Guaranteed
+### Multi-Document Transaction Guaranteed
 
 MongoDB offers robust support for [multi-document ACID transactions](https://www.mongodb.com/products/capabilities/transactions), a critical feature for maintaining data integrity and consistency across multiple collections. This capability ensures that complex operations, such as **account transfers** or **digital payments**, are executed reliably, handling updates across users, accounts, transactions, and notifications collections with precision.
 
@@ -29,7 +29,10 @@ These attributes highlight MongoDB's strength as a powerful choice for developin
 ## Tech Stack
 
 - [MongoDB Atlas](https://www.mongodb.com/atlas/database) for the database
-- [CSS Modules](https://github.com/css-modules/css-modules) for styling
+- [FastAPI](https://fastapi.tiangolo.com/) for the backend framework
+- [Pydantic](https://pydantic-docs.helpmanual.io/) for documenting FastAPI Swagger schemas
+- [Poetry](https://python-poetry.org/) for dependency management
+- [Docker](https://www.docker.com/) for containerization
 
 ## Prerequisites
 
@@ -116,6 +119,15 @@ make build
 ```
 make clean
 ```
+
+## API Documentation
+
+You can access the API documentation by visiting the following URL:
+
+```
+http://localhost:<PORT_NUMBER>/docs
+```
+E.g. `http://localhost:8001/docs`
 
 ## Common errors
 
