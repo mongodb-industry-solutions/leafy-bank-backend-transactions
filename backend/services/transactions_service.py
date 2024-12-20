@@ -307,7 +307,7 @@ class TransactionsService:
 
             # Create notifications
             notification_date = datetime.now(timezone.utc)
-            
+
             notification_accounts = {
                 "AccountIdSender": ObjectId(account_id_sender),
                 "AccountNumberSender": sender_account_number,
@@ -413,10 +413,29 @@ class TransactionsService:
 
         # Start a client session and execute the transaction
         with self.db.client.start_session() as session:
+            # Ensure multi-document ACID transactions:
+            # 1. Atomicity:
+            #    - The `with_transaction` method is used to execute a series of operations as a single transaction.
+            #    - If any operation within the transaction fails, all operations are rolled back, ensuring atomicity.
+            #
+            # 2. Consistency:
+            #    - MongoDB ensures the database transitions from one consistent state to another during the transaction.
+            #    - Operations like updating account balances and inserting transaction documents preserve data integrity.
+            #
+            # 3. Isolation:
+            #    - The transaction operates in an isolated environment.
+            #    - Changes are not visible to other operations until the transaction is successfully committed.
+            #
+            # 4. Durability:
+            #    - Transaction changes are written to the oplog of the replica set.
+            #    - Once committed, changes are durable and can endure server failures.
+            #
+            # - The code uses a callback function with `session.with_transaction(callback)` to execute the transaction.
+            # - This includes multiple updates and inserts across different collections (accounts, transactions, users, notifications).
+            # - Wrapping operations in a transaction ensures execution with ACID properties.
+            #
+            # For more details, see: https://www.mongodb.com/products/capabilities/transactions
             try:
-                # Execute the transaction with ACID guarantees
-                # MongoDB's transactions ensure atomicity, consistency, isolation, and durability.
-                # For more information, see: https://www.mongodb.com/products/capabilities/transactions
                 transaction_id = session.with_transaction(callback)
                 return transaction_id
             except Exception as e:
