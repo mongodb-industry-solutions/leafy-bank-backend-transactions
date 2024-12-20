@@ -46,7 +46,7 @@ Before you begin, ensure you have met the following requirements:
 
 ### Step 1: Set Up MongoDB Database and Collections
 
-1. Log in to [MongoDB Atlas](https://account.mongodb.com/account/login) and create a new database named `leafy_bank`. You can use another name if you prefer, but make sure to update the environment variables accordingly.
+1. Log in to [MongoDB Atlas](https://account.mongodb.com/account/login) and create a new database named `leafy_bank`. You can use another name if you prefer, but make sure to update all database name references in the code and environment variables.
 2. Inside this database, create a 4 (four) empty collections:
     - `users`
     - `accounts`
