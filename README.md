@@ -119,6 +119,4 @@ make clean
 
 ## Common errors
 
-### Backend
-
 - Check that you've created an `.env` file that contains the `MONGODB_URI` and `ORIGINS` variables.
