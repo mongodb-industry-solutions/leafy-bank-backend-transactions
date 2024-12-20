@@ -138,5 +138,6 @@ E.g. `http://localhost:8001/docs`
 ## Future tasks
 
 - [ ] Add tests
-- [ ] Evaluate sonarqube for code quality
-- [ ] Automate the deployment process
+- [ ] Evaluate SonarQube for code quality
+- [ ] Automate the deployment process using GitHub Actions or CodePipeline
+- [ ] Improve Pydantic usage for API Request and Response models
