@@ -6,6 +6,6 @@ services:
       dockerfile: Dockerfile.backend
     image: leafy-bank-backend-transactions-image:latest
     ports:
-      - "8001:8001"
+      - "8000:8000"
     restart: always
     container_name: leafy-bank-backend-transactions-container
