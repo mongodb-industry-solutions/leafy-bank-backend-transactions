@@ -434,7 +434,7 @@ class TransactionsService:
             # - This includes multiple updates and inserts across different collections (accounts, transactions, users, notifications).
             # - Wrapping operations in a transaction ensures execution with ACID properties.
             #
-            # For more details, see: https://www.mongodb.com/products/capabilities/transactions
+            # For more details: https://www.mongodb.com/products/capabilities/transactions
             try:
                 transaction_id = session.with_transaction(callback)
                 return transaction_id
