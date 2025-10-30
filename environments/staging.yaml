@@ -1,0 +1,13 @@
+env:
+  NODE_ENV: staging
+  
+# Secret environment variables (references to K8s secrets)
+envSecrets:
+  # Server-side (for API routes)
+  MONGODB_URI: leafy-bank-backend-transactions
+  ORIGINS: leafy-bank-backend-transactions
+
+serviceAccount:
+  enabled: true
+  create: false  # Don't create a new service account
+  name: irsa  # Use the existing one

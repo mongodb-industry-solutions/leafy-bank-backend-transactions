@@ -84,8 +84,8 @@ class TransactionsService:
         """Perform a transaction between two accounts.
 
         Args:
-            account_id_receiver (str): The ID of the receiver's account.
-            account_id_sender (str): The ID of the sender's account.
+            account_id_receiver (str): The ID of the receiver's account. This is the account that will receive the transaction.
+            account_id_sender (str): The ID of the sender's account. This is the account that will send the transaction.
             transaction_amount (float): The amount to transfer.
             sender_user_id (str): The ID of the sender user.
             sender_user_name (str): The name of the sender user.

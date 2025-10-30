@@ -68,6 +68,9 @@ def validate_transaction_amount(data):
 async def read_root(request: Request):
     return {"message": "Server is running"}
 
+@app.get("/health")  # Add health check endpoint
+def health_check():
+    return {"status": "healthy"}
 
 class UserIdentifierRequest(BaseModel):
     user_identifier: str
