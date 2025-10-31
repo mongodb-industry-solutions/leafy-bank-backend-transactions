@@ -32,13 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the MongoDB connection
+# MongoDB connection
 connection = MongoDBConnection(MONGODB_URI)
 
 # Set the database name
 db_name = "leafy_bank"
 
-# Initialize the TransactionsService
+# TransactionsService
 transactions_service = TransactionsService(connection, db_name)
 
 

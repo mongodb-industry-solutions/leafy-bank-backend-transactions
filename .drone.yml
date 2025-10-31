@@ -6,17 +6,8 @@ name: staging
 trigger:
   branch:
     - staging
-  paths:
-    exclude:
-      - README.md
-      - THIRD-PARTY-NOTICES.md
-      - .gitignore
-      - .env.example
-      - LICENSE
-      - scripts/**
-      - data/**
 
-  steps:
+steps:
   - name: publish-backend
     image: plugins/kaniko-ecr
     settings:
@@ -68,57 +59,48 @@ name: prod
 trigger:
   branch:
     - main
-  paths:
-    exclude:
-      - README.md
-      - THIRD-PARTY-NOTICES.md
-      - .gitignore
-      - .env.example
-      - LICENSE
-      - scripts/**
-      - data/**
 
   steps:
-  - name: publish-backend
-    image: plugins/kaniko-ecr
-    settings:
-      create_repository: true
-      registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
-      repo: industrysolutions/leafy-bank-backend-transactions
-      tags:
-        - git-${DRONE_COMMIT_SHA:0:7}
-        - latest
-      dockerfile: Dockerfile.backend
-      access_key:
-        from_secret: ecr_access_key
-      secret_key:
-        from_secret: ecr_secret_key
-    when:
-      event:
-        - push
+    - name: publish-backend
+      image: plugins/kaniko-ecr
+      settings:
+        create_repository: true
+        registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
+        repo: industrysolutions/leafy-bank-backend-transactions
+        tags:
+          - git-${DRONE_COMMIT_SHA:0:7}
+          - latest
+        dockerfile: Dockerfile.backend
+        access_key:
+          from_secret: ecr_access_key
+        secret_key:
+          from_secret: ecr_secret_key
+      when:
+        event:
+          - push
 
-  - name: deploy-backend-prod
-    image: public.ecr.aws/kanopy/drone-helm:v3
-    settings:
-      chart: mongodb/web-app
-      chart_version: 4.25.0
-      add_repos: [mongodb=https://10gen.github.io/helm-charts]
-      namespace: industrysolutions
-      release: leafy-bank-backend-transactions
-      values:
-        - "image.tag=git-${DRONE_COMMIT_SHA:0:7}"
-        - "image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/industrysolutions/leafy-bank-backend-transactions"
-        - "ingress.enabled=true"
-        - "ingress.hosts[0]=leafy-bank-backend-transactions.industrysolutions.prod.corp.mongodb.com"
-        - "mesh.enabled=true"
-        - "resources.limits.cpu=1000m"
-        - "resources.limits.memory=1024Mi"
-        - "resources.requests.cpu=250m"
-        - "resources.requests.memory=256Mi"
-      api_server: https://api.prod.corp.mongodb.com
-      kubernetes_token:
-        from_secret: prod_kubernetes_token
-      values_files: [ "environments/prod.yaml" ]
-    when:
-      event:
-        - push
+    - name: deploy-backend-prod
+      image: public.ecr.aws/kanopy/drone-helm:v3
+      settings:
+        chart: mongodb/web-app
+        chart_version: 4.25.0
+        add_repos: [mongodb=https://10gen.github.io/helm-charts]
+        namespace: industrysolutions
+        release: leafy-bank-backend-transactions
+        values:
+          - "image.tag=git-${DRONE_COMMIT_SHA:0:7}"
+          - "image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/industrysolutions/leafy-bank-backend-transactions"
+          - "ingress.enabled=true"
+          - "ingress.hosts[0]=leafy-bank-backend-transactions.industrysolutions.prod.corp.mongodb.com"
+          - "mesh.enabled=true"
+          - "resources.limits.cpu=1000m"
+          - "resources.limits.memory=1024Mi"
+          - "resources.requests.cpu=250m"
+          - "resources.requests.memory=256Mi"
+        api_server: https://api.prod.corp.mongodb.com
+        kubernetes_token:
+          from_secret: prod_kubernetes_token
+        values_files: [ "environments/prod.yaml" ]
+      when:
+        event:
+          - push
