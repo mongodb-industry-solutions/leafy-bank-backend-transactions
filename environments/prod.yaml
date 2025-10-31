@@ -1,9 +1,7 @@
 env:
   NODE_ENV: prod
   
-# Secret environment variables (references to K8s secrets)
 envSecrets:
-  # Server-side (for API routes)
   MONGODB_URI: leafy-bank-backend-transactions
   ORIGINS: leafy-bank-backend-transactions
 
