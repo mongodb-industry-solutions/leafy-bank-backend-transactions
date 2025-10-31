@@ -73,7 +73,6 @@ Before you begin, ensure you have met the following requirements:
 
 ```bash
 MONGODB_URI = "mongodb+srv://<REPLACE_USERNAME>:<REPLACE_PASSWORD>@<REPLACE_CLUSTER_NAME>.mongodb.net/<REPLACE_DATABASE_NAME>"
-ORIGINS=http://localhost:3000
 ```
 
 ## Run it Locally
@@ -133,11 +132,8 @@ E.g. `http://localhost:8001/docs`
 
 ## Common errors
 
-- Check that you've created an `.env` file that contains the `MONGODB_URI` and `ORIGINS` variables.
+- Check that you've created an `.env` file that contains the `MONGODB_URI` variable.
 
-## Future tasks
+## 📄 License
 
-- [ ] Add tests
-- [ ] Evaluate SonarQube for code quality
-- [ ] Automate the deployment process using GitHub Actions or CodePipeline
-- [ ] Improve Pydantic usage for API Request and Response models
+See [LICENSE](LICENSE) file for details.

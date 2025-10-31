@@ -3,7 +3,6 @@ env:
   
 envSecrets:
   MONGODB_URI: leafy-bank-backend-transactions
-  ORIGINS: leafy-bank-backend-transactions
 
 serviceAccount:
   enabled: true
