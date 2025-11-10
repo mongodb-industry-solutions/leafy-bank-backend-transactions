@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from typing import Dict, List
 
-
+# MongoDBConnection class
 class MongoDBConnection:
     """  
     This class handles the connection to the database and provides methods to interact with collections and documents.  
