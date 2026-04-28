@@ -1,28 +1,33 @@
-from database.connection import MongoDBConnection
-from services.transactions_service import TransactionsService
-from encoder.json_encoder import MyJSONEncoder
-
-import logging
-
 import json
-from pydantic import BaseModel
-from bson import ObjectId
-
-from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-
+import logging
 import os
+from typing import Optional
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
+
+from api_models import (
+    PaymentOrderInitiateRequest,
+    PaymentOrderRetrieveRequest,
+)
+from database.connection import MongoDBConnection
+from encoder.json_encoder import MyJSONEncoder
+from services.payments_service import PaymentsService
+from services.transactions_service import TransactionsService
+from shared import registry
 
 load_dotenv()
 
-# Configure logging
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 MONGODB_URI = os.getenv("MONGODB_URI")
+DB_NAME = os.getenv("LEAFYBANK_DB_NAME", "leafy_bank_bian")
+PAYMENT_LIMIT_USD = float(os.getenv("PAYMENT_LIMIT_USD", "500"))
 
-app = FastAPI()
+app = FastAPI(title="Leafy Bank — Payments (BIAN PaymentOrderProcedure)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,227 +37,91 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# MongoDB connection
 connection = MongoDBConnection(MONGODB_URI)
-
-# Set the database name
-db_name = "leafy_bank"
-
-# TransactionsService
-transactions_service = TransactionsService(connection, db_name)
+payments_service = PaymentsService(connection, DB_NAME, PAYMENT_LIMIT_USD)
+transactions_service = TransactionsService(connection, DB_NAME)
 
 
-def validate_transaction_amount(data):
-    """Validate the transaction amount from the request data."""
-    try:
-        transaction_amount = float(data["transaction_amount"])
-    except ValueError:
-        raise HTTPException(
-            status_code=400, detail="Transaction amount must be a valid number.")
-
-    if transaction_amount <= 0:
-        raise HTTPException(
-            status_code=400, detail="Transaction amount must be greater than 0.")
-
-    transaction_limit = float(500)
-    if transaction_amount > transaction_limit:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Transaction amount exceeds the limit of {transaction_limit}. Please ensure the amount is {transaction_limit} or less."
-        )
-
-    return transaction_amount
+def _bian_response(envelope: dict) -> Response:
+    return Response(
+        content=json.dumps(envelope, cls=MyJSONEncoder),
+        media_type="application/json",
+    )
 
 
 @app.get("/")
-async def read_root(request: Request):
-    return {"message": "Server is running"}
+async def read_root():
+    return {
+        "service": "leafy-bank-payments",
+        "bian": "PaymentOrderProcedure",
+        "bianVersion": registry.bian_version,
+    }
 
-@app.get("/health")  # Add health check endpoint
+
+@app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
-class UserIdentifierRequest(BaseModel):
-    user_identifier: str
 
+@app.post("/PaymentOrderProcedure/Initiate")
+async def payment_order_procedure_initiate(
+    body: PaymentOrderInitiateRequest,
+    idempotency_key: Optional[str] = Header(default=None, alias="Idempotency-Key"),
+):
+    """BIAN PaymentOrderProcedure / Initiate.
 
-class RecentTransactionsResponse(BaseModel):
-    transactions: dict
-
-
-@app.post("/fetch-recent-transactions-for-user", response_model=RecentTransactionsResponse)
-async def fetch_recent_transactions_for_user(request: Request, user_data: UserIdentifierRequest):
-    """
-    Retrieve recent transactions for a specific user by UserName or ID.
-
-    Args:
-        request (Request): The request object containing the user_identifier.
-        user_data (UserIdentifierRequest): The user identifier data.
-
-    Returns:
-        RecentTransactionsResponse: A dictionary containing a list of recent transactions associated with the user.
+    Boundary validation handled by `PaymentOrderInitiateRequest`. Translation to
+    camelCase storage keys handled by `registry.to_alias("payments", ...)`.
     """
     try:
-        data = await request.json()
-        user_identifier = data.get("user_identifier")
-        if not user_identifier:
-            raise HTTPException(
-                status_code=400, detail="User identifier is required")
-        if ObjectId.is_valid(user_identifier):
-            user_identifier = ObjectId(user_identifier)
-        # Validate if the user exists
-        if not transactions_service.is_valid_user(user_identifier):
-            raise HTTPException(
-                status_code=404, detail="User not found")
-        transactions = transactions_service.get_recent_transactions_for_user(
-            user_identifier)
-        if transactions:
-            logging.info(
-                f"Found {len(transactions)} recent transactions for user {user_identifier}")
-            return Response(content=json.dumps({"transactions": transactions}, cls=MyJSONEncoder), media_type="application/json")
-        else:
-            logging.info(
-                f"No recent transactions found for user {user_identifier}")
-            return Response(content=json.dumps({"transactions": []}, cls=MyJSONEncoder), media_type="application/json")
-    except Exception as e:
-        logging.error(
-            f"Error retrieving recent transactions for user: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        alias_body = registry.to_alias("payments", body.model_dump(exclude_none=True))
+        debtor = alias_body.get("debtor") or {}
+        creditor = alias_body.get("creditor") or {}
+        remittance = alias_body.get("remittance") or {}
 
-
-class AccountTransferRequest(BaseModel):
-    account_id_sender: str
-    account_id_receiver: str
-    transaction_amount: float
-    sender_user_id: str
-    sender_user_name: str
-    sender_account_number: str
-    sender_account_type: str
-    receiver_user_id: str
-    receiver_user_name: str
-    receiver_account_number: str
-    receiver_account_type: str
-
-
-class AccountTransferResponse(BaseModel):
-    message: str
-    transaction_id: str
-
-
-@app.post("/perform-account-transfer", response_model=AccountTransferResponse)
-async def perform_account_transfer(request: Request, transfer_data: AccountTransferRequest):
-    """
-    Perform an account transfer transaction.
-
-    Args:
-        request (Request): The request object containing transaction data.
-        transfer_data (AccountTransferRequest): The transfer data.
-
-    Returns:
-        AccountTransferResponse: A dictionary indicating success with the transaction ID.
-    """
-    try:
-        data = await request.json()
-        transaction_amount = validate_transaction_amount(data)
-
-        transaction_id = transactions_service.perform_transaction(
-            account_id_sender=data["account_id_sender"],
-            account_id_receiver=data["account_id_receiver"],
-            transaction_amount=transaction_amount,
-            sender_user_id=data["sender_user_id"],
-            sender_user_name=data["sender_user_name"],
-            sender_account_number=data["sender_account_number"],
-            sender_account_type=data["sender_account_type"],
-            receiver_user_id=data["receiver_user_id"],
-            receiver_user_name=data["receiver_user_name"],
-            receiver_account_number=data["receiver_account_number"],
-            receiver_account_type=data["receiver_account_type"],
-            transaction_type="AccountTransfer"
+        payment_doc = payments_service.initiate_payment(
+            customer_ref=alias_body["customerId"],
+            debtor_account_ref=debtor["accountId"],
+            creditor_account_ref=creditor["accountId"],
+            instructed_amount=alias_body["instructedAmount"],
+            instructed_currency=alias_body["instructedCurrency"],
+            payment_type=alias_body["type"],
+            payment_rail=alias_body["rail"],
+            remittance_unstructured=remittance.get("unstructured"),
+            idempotency_key=idempotency_key,
         )
-        if transaction_id:
-            logging.info(
-                f"Account transfer transaction completed successfully with ID: {transaction_id}")
-            return {"message": "Account transfer transaction completed successfully.", "transaction_id": str(transaction_id)}
-        else:
-            logging.error("Account transfer transaction failed.")
-            raise HTTPException(
-                status_code=400, detail="Account transfer transaction failed.")
-    except HTTPException as e:
-        raise e
+        return _bian_response({
+            "PaymentOrderReference": payment_doc["paymentId"],
+            "PaymentApexStatus": payment_doc["status"],
+            "PaymentOrderRecord": registry.to_bian("payments", payment_doc),
+        })
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logging.error(f"Failed to perform account transfer: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error("PaymentOrderProcedure/Initiate failed: %s", e)
+        raise HTTPException(status_code=500, detail="Internal payment processing error.")
 
 
-class DigitalPaymentRequest(BaseModel):
-    account_id_sender: str
-    account_id_receiver: str
-    transaction_amount: float
-    sender_user_id: str
-    sender_user_name: str
-    sender_account_number: str
-    sender_account_type: str
-    receiver_user_id: str
-    receiver_user_name: str
-    receiver_account_number: str
-    receiver_account_type: str
-    payment_method: str
-
-
-class DigitalPaymentResponse(BaseModel):
-    message: str
-    transaction_id: str
-
-
-@app.post("/perform-digital-payment", response_model=DigitalPaymentResponse)
-async def perform_digital_payment(request: Request, payment_data: DigitalPaymentRequest):
-    """
-    Perform a digital payment transaction.
-
-    Args:
-        request (Request): The request object containing payment data.
-        payment_data (DigitalPaymentRequest): The payment data.
-
-    Returns:
-        DigitalPaymentResponse: A dictionary indicating success with the transaction ID.
-    """
+@app.post("/PaymentOrderProcedure/Retrieve")
+async def payment_order_procedure_retrieve(body: PaymentOrderRetrieveRequest):
+    """BIAN PaymentOrderProcedure / Retrieve — payment order plus its ledger legs."""
     try:
-        data = await request.json()
-        transaction_amount = validate_transaction_amount(data)
+        payment = payments_service.retrieve_payment(body.PaymentOrderReference)
+        if not payment:
+            raise HTTPException(status_code=404, detail="PaymentOrderReference not found.")
 
-        # Validate payment method
-        payment_method = data.get("payment_method")
-        if not payment_method or payment_method == "N/A":
-            raise HTTPException(
-                status_code=400,
-                detail="Payment method must be selected for a digital payment."
-            )
-
-        transaction_id = transactions_service.perform_transaction(
-            account_id_sender=data["account_id_sender"],
-            account_id_receiver=data["account_id_receiver"],
-            transaction_amount=transaction_amount,
-            sender_user_id=data["sender_user_id"],
-            sender_user_name=data["sender_user_name"],
-            sender_account_number=data["sender_account_number"],
-            sender_account_type=data["sender_account_type"],
-            receiver_user_id=data["receiver_user_id"],
-            receiver_user_name=data["receiver_user_name"],
-            receiver_account_number=data["receiver_account_number"],
-            receiver_account_type=data["receiver_account_type"],
-            transaction_type="DigitalPayment",
-            payment_method=payment_method
-        )
-        if transaction_id:
-            logging.info(
-                f"Digital payment transaction completed successfully with ID: {transaction_id}")
-            return {"message": "Digital payment transaction completed successfully.", "transaction_id": str(transaction_id)}
-        else:
-            logging.error("Digital payment transaction failed.")
-            raise HTTPException(
-                status_code=400, detail="Digital payment transaction failed.")
-    except HTTPException as e:
-        raise e
+        legs = payment.pop("_ledgerLegs", [])
+        return _bian_response({
+            "PaymentOrderReference": payment["paymentId"],
+            "PaymentOrderRecord": registry.to_bian("payments", payment),
+            "CurrentAccountPaymentTransactionRecord": [
+                registry.to_bian("transactions", leg) for leg in legs
+            ],
+        })
+    except HTTPException:
+        raise
     except Exception as e:
-        logging.error(f"Failed to perform digital payment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error("PaymentOrderProcedure/Retrieve failed: %s", e)
+        raise HTTPException(status_code=500, detail="Internal retrieve error.")
