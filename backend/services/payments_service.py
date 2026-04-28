@@ -207,6 +207,7 @@ class PaymentsService:
                 account=debtor_account,
                 account_after=debtor_after,
                 counterparty=creditor_account,
+                counterparty_customer=creditor_customer,
                 amount=instructed_amount,
                 currency=instructed_currency,
                 txn_code=txn_code,
@@ -220,6 +221,7 @@ class PaymentsService:
                 account=creditor_account,
                 account_after=creditor_after,
                 counterparty=debtor_account,
+                counterparty_customer=debtor_customer,
                 amount=instructed_amount,
                 currency=instructed_currency,
                 txn_code=txn_code,
@@ -288,6 +290,7 @@ def _ledger_leg(
     account: dict,
     account_after: dict,
     counterparty: dict,
+    counterparty_customer: Optional[dict],
     amount: float,
     currency: str,
     txn_code: str,
@@ -295,6 +298,9 @@ def _ledger_leg(
     now: datetime,
 ) -> dict:
     leg_oid = ObjectId()
+    counterparty_name = (
+        ((counterparty_customer or {}).get("identification") or {}).get("legalName")
+    )
     return {
         "_id": leg_oid,
         "txnId": f"{derive_ref('TXN', payment_oid)}-{leg}",
@@ -312,7 +318,7 @@ def _ledger_leg(
         "isReversed": False,
         "reversalTxnId": None,
         "counterparty": {
-            "name": None,
+            "name": counterparty_name,
             "accountNo": counterparty.get("accountNumber"),
             "bic": "LEAFUS33",
             "country": "US",
