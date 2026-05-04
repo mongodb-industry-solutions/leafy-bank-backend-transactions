@@ -49,6 +49,11 @@ def _bian_response(envelope: dict) -> Response:
     )
 
 
+def _strip(doc: dict) -> dict:
+    doc.pop("_id", None)
+    return doc
+
+
 @app.get("/")
 async def read_root():
     return {
@@ -68,32 +73,22 @@ async def payment_order_procedure_initiate(
     body: PaymentOrderInitiateRequest,
     idempotency_key: Optional[str] = Header(default=None, alias="Idempotency-Key"),
 ):
-    """BIAN PaymentOrderProcedure / Initiate.
-
-    Boundary validation handled by `PaymentOrderInitiateRequest`. Translation to
-    camelCase storage keys handled by `registry.to_alias("payments", ...)`.
-    """
     try:
-        alias_body = registry.to_alias("payments", body.model_dump(exclude_none=True))
-        debtor = alias_body.get("debtor") or {}
-        creditor = alias_body.get("creditor") or {}
-        remittance = alias_body.get("remittance") or {}
-
         payment_doc = payments_service.initiate_payment(
-            customer_ref=alias_body["customerId"],
-            debtor_account_ref=debtor["accountId"],
-            creditor_account_ref=creditor["accountId"],
-            instructed_amount=alias_body["instructedAmount"],
-            instructed_currency=alias_body["instructedCurrency"],
-            payment_type=alias_body["type"],
-            payment_rail=alias_body["rail"],
-            remittance_unstructured=remittance.get("unstructured"),
+            customer_ref=body.customerId,
+            debtor_account_ref=body.debtor.accountId,
+            creditor_account_ref=body.creditor.accountId,
+            instructed_amount=body.instructedAmount,
+            instructed_currency=body.instructedCurrency,
+            payment_type=body.type,
+            payment_rail=body.rail,
+            remittance_unstructured=(body.remittance.unstructured if body.remittance else None),
             idempotency_key=idempotency_key,
         )
         return _bian_response({
-            "PaymentOrderReference": payment_doc["paymentId"],
-            "PaymentApexStatus": payment_doc["status"],
-            "PaymentOrderRecord": registry.to_bian("payments", payment_doc),
+            "paymentId": payment_doc["paymentId"],
+            "status": payment_doc["status"],
+            "payment": _strip(payment_doc),
         })
     except HTTPException:
         raise
@@ -106,19 +101,16 @@ async def payment_order_procedure_initiate(
 
 @app.post("/PaymentOrderProcedure/Retrieve")
 async def payment_order_procedure_retrieve(body: PaymentOrderRetrieveRequest):
-    """BIAN PaymentOrderProcedure / Retrieve — payment order plus its ledger legs."""
     try:
-        payment = payments_service.retrieve_payment(body.PaymentOrderReference)
+        payment = payments_service.retrieve_payment(body.paymentId)
         if not payment:
-            raise HTTPException(status_code=404, detail="PaymentOrderReference not found.")
+            raise HTTPException(status_code=404, detail="paymentId not found.")
 
         legs = payment.pop("_ledgerLegs", [])
         return _bian_response({
-            "PaymentOrderReference": payment["paymentId"],
-            "PaymentOrderRecord": registry.to_bian("payments", payment),
-            "CurrentAccountPaymentTransactionRecord": [
-                registry.to_bian("transactions", leg) for leg in legs
-            ],
+            "paymentId": payment["paymentId"],
+            "payment": _strip(payment),
+            "transactions": [_strip(leg) for leg in legs],
         })
     except HTTPException:
         raise
