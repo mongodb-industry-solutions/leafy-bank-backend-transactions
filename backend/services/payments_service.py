@@ -11,6 +11,21 @@ from shared.refs import derive_ref
 
 logger = logging.getLogger(__name__)
 
+# v6: payments.debtor.accountType / creditor.accountType / transactions.counterparty.accountType
+# all share the same enum (title-case). Internal accounts.type is upper-case.
+_ACCOUNT_TYPE_DISPLAY = {
+    "CURRENT": "Current",
+    "SAVINGS": "Savings",
+    "CHECKING": "Checking",
+    "FIXED_DEPOSIT": "FixedDeposit",
+}
+
+
+def _display_account_type(account_type: Optional[str]) -> Optional[str]:
+    if not account_type:
+        return None
+    return _ACCOUNT_TYPE_DISPLAY.get(account_type)
+
 
 class PaymentsService:
     """Write path for the BIAN PaymentOrderProcedure service domain.
@@ -87,17 +102,19 @@ class PaymentsService:
         if available < instructed_amount:
             raise ValueError("Insufficient available balance in debtor account.")
 
-        debtor_customer_id = debtor_account["customerId"]
+        # v6: customer FK lives at customerSnapshot.customerId (top-level customerId removed).
+        debtor_customer_id = debtor_account["customerSnapshot"]["customerId"]
+        creditor_customer_id = creditor_account["customerSnapshot"]["customerId"]
         if debtor_customer_id != customer_ref:
             raise ValueError(
                 f"Debtor account {debtor_account_ref} is not owned by {customer_ref}."
             )
         debtor_customer = self.customers.find_one({"customerId": debtor_customer_id})
-        creditor_customer = self.customers.find_one({"customerId": creditor_account["customerId"]})
+        creditor_customer = self.customers.find_one({"customerId": creditor_customer_id})
         if not debtor_customer or not creditor_customer:
             raise ValueError("Customer reference data missing for debtor or creditor.")
 
-        is_internal = debtor_customer_id == creditor_account["customerId"]
+        is_internal = debtor_customer_id == creditor_customer_id
 
         payment_oid = ObjectId()
         payment_id = derive_ref("PAY", payment_oid)
@@ -149,11 +166,13 @@ class PaymentsService:
                 "type": "CREDIT_TRANSFER",
                 "rail": payment_rail,
                 "status": "RECEIVED",
+                "priority": "NORMAL",
                 "instructedAmount": instructed_amount,
                 "instructedCurrency": instructed_currency,
                 "amount": instructed_amount,
                 "currency": instructed_currency,
                 "chargeBearer": "SLEV",
+                "fees": [],
                 "debtor": _party_snapshot(debtor_customer, debtor_account),
                 "creditor": _party_snapshot(creditor_customer, creditor_account),
                 "remittance": {
@@ -280,6 +299,7 @@ def _party_snapshot(customer: dict, account: dict) -> dict:
         "name": identification.get("legalName"),
         "bic": "LEAFUS33",
         "address": (customer.get("contact", {}) or {}).get("addresses", []),
+        "accountType": _display_account_type(account.get("type")),
     }
 
 
@@ -298,18 +318,19 @@ def _ledger_leg(
     now: datetime,
 ) -> dict:
     leg_oid = ObjectId()
-    counterparty_name = (
-        ((counterparty_customer or {}).get("identification") or {}).get("legalName")
-    )
+    identification = ((counterparty_customer or {}).get("identification") or {})
+    payment_id_suffix = payment_id.split("-", 1)[1] if "-" in payment_id else payment_id
     return {
         "_id": leg_oid,
         "txnId": f"{derive_ref('TXN', payment_oid)}-{leg}",
         "accountId": account["accountId"],
         "paymentId": payment_id,
+        "bankRef": f"LEAFY-BOOK-{payment_id_suffix}",
         "type": leg,
         "txnCode": txn_code,
         "amount": amount,
         "currency": currency,
+        "baseAmount": amount,
         "valueDate": now.date().isoformat(),
         "bookingDate": now.date().isoformat(),
         "description": description,
@@ -318,15 +339,12 @@ def _ledger_leg(
         "isReversed": False,
         "reversalTxnId": None,
         "counterparty": {
-            "name": counterparty_name,
+            "name": identification.get("legalName"),
+            "userName": identification.get("userName"),
             "accountNo": counterparty.get("accountNumber"),
+            "accountType": _display_account_type(counterparty.get("type")),
             "bic": "LEAFUS33",
             "country": "US",
-        },
-        "gl": {
-            "glAccountId": (account.get("gl") or {}).get("glAccountId"),
-            "costCenter": "CC-RETAIL-DEFAULT",
-            "postingStatus": "POSTED",
         },
         "createdAt": now,
         "createdBy": "SERVICE-PAYMENTS",
