@@ -106,11 +106,11 @@ async def payment_order_procedure_retrieve(body: PaymentOrderRetrieveRequest):
         if not payment:
             raise HTTPException(status_code=404, detail="paymentId not found.")
 
-        legs = payment.pop("_ledgerLegs", [])
+        txn = payment.pop("_txn", None)
         return _bian_response({
             "paymentId": payment["paymentId"],
             "payment": _strip(payment),
-            "transactions": [_strip(leg) for leg in legs],
+            "transaction": _strip(txn) if txn else None,
         })
     except HTTPException:
         raise
