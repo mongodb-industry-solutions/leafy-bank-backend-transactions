@@ -30,8 +30,7 @@ class PaymentsService:
     """`initiate_payment` inserts the payment order (status PENDING) OUTSIDE the transaction, then
     performs the money move as ONE multi-document ACID transaction on `leafy_bank_bian`: debtor
     balance update, creditor balance update, ONE `transactions` doc (payer/payee, v4_21 — no legs,
-    no GL), and the payment status flip to SETTLED. No notification or GL writes — the ledger
-    service derives DR/CR ledgerEvents downstream via CDC on `transactions`.
+    no GL), payment status flip to SETTLED, and a sender-side notification insert.
     """
 
     def __init__(self, connection: MongoDBConnection, db_name: str, payment_limit_usd: float):
@@ -40,6 +39,7 @@ class PaymentsService:
         self.accounts = self.db["accounts"]
         self.payments = self.db["payments"]
         self.transactions = self.db["transactions"]
+        self.notifications = self.db["notifications"]
         self.payment_limit_usd = payment_limit_usd
 
     def initiate_payment(
@@ -232,6 +232,23 @@ class PaymentsService:
             )
             self.transactions.insert_one(txn_doc, session=session)
 
+            notif_docs = _build_notifications(
+                payment_oid=payment_oid,
+                payment_id=payment_id,
+                txn_id=txn_doc["txnId"],
+                debtor_account=debtor_account,
+                creditor_account=creditor_account,
+                debtor_customer=debtor_customer,
+                debtor_after=debtor_after,
+                amount=instructed_amount,
+                currency=instructed_currency,
+                payment_rail=payment_rail,
+                is_internal=is_internal,
+                now=now,
+            )
+            if notif_docs:
+                self.notifications.insert_many(notif_docs, session=session)
+
             self.payments.update_one(
                 {"_id": payment_oid},
                 {"$set": {"status": "SETTLED", "clearing.settledAt": now, "updatedAt": now}},
@@ -332,3 +349,67 @@ def _transaction_doc(
         "createdBy": "SERVICE-PAYMENTS",
         "sourceSystem": "leafy-bank-payments-service",
     }
+
+
+def _build_notifications(
+    *,
+    payment_oid: ObjectId,
+    payment_id: str,
+    txn_id: str,
+    debtor_account: dict,
+    creditor_account: dict,
+    debtor_customer: dict,
+    debtor_after: dict,
+    amount: float,
+    currency: str,
+    payment_rail: str,
+    is_internal: bool,
+    now: datetime,
+) -> list[dict]:
+    """Build the sender-side notification for a payment.
+
+    Leafy Bank UX: only the debtor (sender) receives a notification. Always returns exactly
+    one document. `txn_id` is the single v4_21 transaction doc's txnId.
+    """
+    debtor_balance = (debtor_after.get("balance", {}) or {}).get("current")
+    creditor_name = creditor_account.get("accountNumber") or creditor_account.get("accountId")
+
+    if is_internal:
+        event_type = "InternalTransfer"
+        message = (
+            f"You transferred {currency} {amount} between your accounts. "
+            f"New balance on {debtor_account['accountId']}: {currency} {debtor_balance}."
+        )
+    elif payment_rail == "INTERNAL":
+        event_type = "TransferSent"
+        message = (
+            f"You sent {currency} {amount} to {creditor_name}. "
+            f"New balance: {currency} {debtor_balance}."
+        )
+    else:
+        event_type = "PaymentMade"
+        message = (
+            f"You paid {currency} {amount} to {creditor_name}. "
+            f"New balance: {currency} {debtor_balance}."
+        )
+
+    notif_oid = ObjectId()
+    return [
+        {
+            "_id": notif_oid,
+            "notificationId": derive_ref("NOTIF", notif_oid),
+            "eventType": event_type,
+            "message": message,
+            "notificationDate": now,
+            "recipient": {"customerId": debtor_customer["customerId"]},
+            "transactionId": txn_id,
+            "paymentId": payment_id,
+            "accounts": {
+                "senderAccountId": debtor_account["accountId"],
+                "receiverAccountId": creditor_account["accountId"],
+            },
+            "createdAt": now,
+            "createdBy": "SERVICE-PAYMENTS",
+            "sourceSystem": "leafy-bank-payments-service",
+        }
+    ]
